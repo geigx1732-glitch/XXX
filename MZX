@@ -1,0 +1,565 @@
+-- ============ MZ AI Hub v18 (Auto Aim) ============
+local pg = (gethui and gethui()) or game:GetService("CoreGui")
+local old = pg:FindFirstChild("MZ_AI")
+if old then old:Destroy() end
+local oldJ = pg:FindFirstChild("MZ_JumpPower")
+if oldJ then oldJ:Destroy() end
+local oldI = pg:FindFirstChild("MZ_InfJump")
+if oldI then oldI:Destroy() end
+local oldS = pg:FindFirstChild("MZ_Speed")
+if oldS then oldS:Destroy() end
+local oldE = pg:FindFirstChild("MZ_ESP")
+if oldE then oldE:Destroy() end
+local oldA = pg:FindFirstChild("MZ_Aim")
+if oldA then oldA:Destroy() end
+
+local U = game:GetService("UserInputService")
+local P = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local LP = P.LocalPlayer
+
+local SG = Instance.new("ScreenGui")
+SG.Name = "MZ_AI"
+SG.ResetOnSpawn = false
+SG.Parent = pg
+
+-- ============ ปุ่ม MZ ============
+local OpenBtn = Instance.new("TextButton", SG)
+OpenBtn.Size = UDim2.new(0, 60, 0, 60)
+OpenBtn.Position = UDim2.new(0, 15, 0.4, 0)
+OpenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+OpenBtn.Text = "MZ"
+OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenBtn.TextSize = 20
+OpenBtn.Font = Enum.Font.SourceSansBold
+OpenBtn.Draggable = true
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
+
+local rainbowStroke = Instance.new("UIStroke", OpenBtn)
+rainbowStroke.Thickness = 3
+rainbowStroke.Color = Color3.fromRGB(255, 0, 0)
+
+local hue = 0
+RunService.Heartbeat:Connect(function(dt)
+    hue = (hue + dt * 0.5) % 1
+    rainbowStroke.Color = Color3.fromHSV(hue, 1, 1)
+end)
+
+-- ============ MainFrame ============
+local MF = Instance.new("Frame", SG)
+MF.Size = UDim2.new(0, 400, 0, 340)
+MF.Position = UDim2.new(0.5, -200, 0.5, -170)
+MF.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+MF.BorderSizePixel = 0
+MF.Active = true
+MF.Visible = false
+Instance.new("UICorner", MF).CornerRadius = UDim.new(0, 12)
+
+local mfStroke = Instance.new("UIStroke", MF)
+mfStroke.Thickness = 2
+mfStroke.Color = Color3.fromRGB(255, 0, 0)
+
+local hue2 = 0.5
+RunService.Heartbeat:Connect(function(dt)
+    hue2 = (hue2 + dt * 0.5) % 1
+    mfStroke.Color = Color3.fromHSV(hue2, 1, 1)
+end)
+
+local HD = Instance.new("TextLabel", MF)
+HD.Size = UDim2.new(1, -100, 0, 30)
+HD.Position = UDim2.new(0, 16, 0, 8)
+HD.BackgroundTransparency = 1
+HD.Text = "Maverick Z Hub"
+HD.TextColor3 = Color3.fromRGB(255, 200, 100)
+HD.TextSize = 15
+HD.Font = Enum.Font.SourceSansBold
+HD.TextXAlignment = Enum.TextXAlignment.Left
+HD.Active = true
+
+local hue3 = 0
+RunService.Heartbeat:Connect(function(dt)
+    hue3 = (hue3 + dt * 0.3) % 1
+    HD.TextColor3 = Color3.fromHSV(hue3, 1, 1)
+end)
+
+local ModeBtn = Instance.new("TextButton", MF)
+ModeBtn.Size = UDim2.new(0, 90, 0, 26)
+ModeBtn.Position = UDim2.new(1, -128, 0, 10)
+ModeBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 20)
+ModeBtn.Text = "โปร 0.10"
+ModeBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+ModeBtn.TextSize = 11
+ModeBtn.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", ModeBtn).CornerRadius = UDim.new(0, 4)
+
+local CloseBtn = Instance.new("TextButton", MF)
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.Position = UDim2.new(1, -34, 0, 10)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+CloseBtn.TextSize = 13
+CloseBtn.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 4)
+
+CloseBtn.MouseButton1Click:Connect(function() MF.Visible = false end)
+OpenBtn.MouseButton1Click:Connect(function() MF.Visible = not MF.Visible end)
+
+local dg, ds, sp = false, nil, nil
+HD.InputBegan:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1
+    or i.UserInputType == Enum.UserInputType.Touch then
+        dg = true; ds = i.Position; sp = MF.Position
+    end
+end)
+U.InputChanged:Connect(function(i)
+    if dg then
+        local d = i.Position - ds
+        MF.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
+    end
+end)
+U.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1
+    or i.UserInputType == Enum.UserInputType.Touch then dg = false end
+end)
+
+local ChatScroll = Instance.new("ScrollingFrame", MF)
+ChatScroll.Size = UDim2.new(1, -20, 1, -110)
+ChatScroll.Position = UDim2.new(0, 10, 0, 42)
+ChatScroll.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+ChatScroll.BorderSizePixel = 0
+ChatScroll.ScrollBarThickness = 3
+ChatScroll.ScrollBarImageColor3 = Color3.fromRGB(255, 140, 20)
+ChatScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+ChatScroll.Active = true
+Instance.new("UICorner", ChatScroll).CornerRadius = UDim.new(0, 6)
+
+local ChatLayout = Instance.new("UIListLayout", ChatScroll)
+ChatLayout.Padding = UDim.new(0, 4)
+ChatLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+local ChatPad = Instance.new("UIPadding", ChatScroll)
+ChatPad.PaddingTop = UDim.new(0, 6)
+ChatPad.PaddingLeft = UDim.new(0, 6)
+ChatPad.PaddingRight = UDim.new(0, 6)
+
+ChatLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    ChatScroll.CanvasSize = UDim2.new(0, 0, 0, ChatLayout.AbsoluteContentSize.Y + 12)
+end)
+
+local function AddMsg(text, isUser, isSystem)
+    local lbl = Instance.new("TextLabel", ChatScroll)
+    lbl.Size = UDim2.new(1, 0, 0, 0)
+    lbl.AutomaticSize = Enum.AutomaticSize.Y
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextSize = 13
+    lbl.Font = Enum.Font.SourceSans
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.TextYAlignment = Enum.TextYAlignment.Top
+    lbl.TextWrapped = true
+
+    if isSystem then
+        lbl.TextColor3 = Color3.fromRGB(255, 140, 20)
+    elseif isUser then
+        lbl.TextColor3 = Color3.fromRGB(150, 200, 255)
+        lbl.Text = "> " .. text
+    else
+        lbl.TextColor3 = Color3.fromRGB(220, 220, 220)
+    end
+
+    task.wait(0.05)
+    ChatScroll.CanvasPosition = Vector2.new(0, ChatLayout.AbsoluteContentSize.Y)
+end
+
+local InputBox = Instance.new("TextBox", MF)
+InputBox.Size = UDim2.new(1, -110, 0, 38)
+InputBox.Position = UDim2.new(0, 10, 1, -50)
+InputBox.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+InputBox.BorderSizePixel = 0
+InputBox.Text = ""
+InputBox.PlaceholderText = "พิมพ์ 1-5 / ปิด1-5 / สคริปทั้งหมด..."
+InputBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 130)
+InputBox.TextColor3 = Color3.fromRGB(230, 230, 230)
+InputBox.TextSize = 12
+InputBox.Font = Enum.Font.SourceSans
+InputBox.ClearTextOnFocus = false
+InputBox.TextXAlignment = Enum.TextXAlignment.Left
+InputBox.ZIndex = 5
+Instance.new("UICorner", InputBox).CornerRadius = UDim.new(0, 6)
+local ibPad = Instance.new("UIPadding", InputBox)
+ibPad.PaddingLeft = UDim.new(0, 10)
+
+local ModeSmall = Instance.new("TextButton", MF)
+ModeSmall.Size = UDim2.new(0, 45, 0, 38)
+ModeSmall.Position = UDim2.new(1, -90, 1, -50)
+ModeSmall.BackgroundColor3 = Color3.fromRGB(255, 140, 20)
+ModeSmall.Text = "MODE"
+ModeSmall.TextColor3 = Color3.fromRGB(0, 0, 0)
+ModeSmall.TextSize = 10
+ModeSmall.Font = Enum.Font.SourceSansBold
+ModeSmall.ZIndex = 5
+Instance.new("UICorner", ModeSmall).CornerRadius = UDim.new(0, 6)
+
+local SendBtn = Instance.new("TextButton", MF)
+SendBtn.Size = UDim2.new(0, 45, 0, 38)
+SendBtn.Position = UDim2.new(1, -45, 1, -50)
+SendBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 20)
+SendBtn.Text = "ส่ง"
+SendBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+SendBtn.TextSize = 12
+SendBtn.Font = Enum.Font.SourceSansBold
+SendBtn.ZIndex = 5
+Instance.new("UICorner", SendBtn).CornerRadius = UDim.new(0, 6)
+
+-- ============ State ============
+local activeFeatures = {[1]=false, [2]=false, [3]=false, [4]=false, [5]=false}
+
+-- ============ 🦘 F1: JumpPower ============
+local jumpPowerGui = nil
+local jumpPowerVal = 150
+
+local function ApplyJumpPower()
+    local ch = LP.Character
+    local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum.UseJumpPower = true
+        hum.JumpPower = activeFeatures[1] and jumpPowerVal or 50
+    end
+end
+
+local function OpenJumpPower()
+    if activeFeatures[1] then return end
+    activeFeatures[1] = true
+    jumpPowerGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    jumpPowerGui.Name = "MZ_JumpPower"
+    jumpPowerGui.ResetOnSpawn = false
+
+    local Frame = Instance.new("Frame", jumpPowerGui)
+    Frame.Size = UDim2.new(0, 260, 0, 130)
+    Frame.Position = UDim2.new(0, 20, 0.3, 0)
+    Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+    Frame.Active = true
+    Frame.Draggable = true
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
+
+    local Title = Instance.new("TextLabel", Frame)
+    Title.Size = UDim2.new(1, -10, 0, 24)
+    Title.Position = UDim2.new(0, 5, 0, 5)
+    Title.BackgroundTransparency = 1
+    Title.Text = "🦘 MZ JumpPower"
+    Title.TextColor3 = Color3.fromRGB(255, 200, 100)
+    Title.TextSize = 14
+    Title.Font = Enum.Font.SourceSansBold
+
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Size = UDim2.new(1, -20, 0, 20)
+    Label.Position = UDim2.new(0, 10, 0, 70)
+    Label.BackgroundTransparency = 1
+    Label.Text = "JumpPower: " .. jumpPowerVal
+    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.TextSize = 12
+
+    local Bar = Instance.new("Frame", Frame)
+    Bar.Size = UDim2.new(1, -20, 0, 14)
+    Bar.Position = UDim2.new(0, 10, 0, 95)
+    Bar.BackgroundColor3 = Color3.fromRGB(50, 45, 60)
+    Bar.BorderSizePixel = 0
+    Instance.new("UICorner", Bar).CornerRadius = UDim.new(1, 0)
+
+    local Fill = Instance.new("Frame", Bar)
+    Fill.Size = UDim2.new(0.22, 0, 1, 0)
+    Fill.BackgroundColor3 = Color3.fromRGB(255, 140, 20)
+    Fill.BorderSizePixel = 0
+    Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
+
+    local Knob = Instance.new("Frame", Bar)
+    Knob.Size = UDim2.new(0, 18, 0, 18)
+    Knob.Position = UDim2.new(0.22, -9, 0.5, -9)
+    Knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Knob.ZIndex = 2
+    Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
+
+    local dragging = false
+    local function setFromX(x)
+        local ax = Bar.AbsolutePosition.X
+        local aw = Bar.AbsoluteSize.X
+        local a = math.clamp((x - ax) / aw, 0, 1)
+        local v = math.floor(50 + (500 - 50) * a)
+        jumpPowerVal = v
+        Fill.Size = UDim2.new(a, 0, 1, 0)
+        Knob.Position = UDim2.new(a, -9, 0.5, -9)
+        Label.Text = "JumpPower: " .. v
+        if activeFeatures[1] then ApplyJumpPower() end
+    end
+    Bar.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1
+        or i.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; setFromX(i.Position.X)
+        end
+    end)
+    U.InputEnded:Connect(function() dragging = false end)
+    RunService.RenderStepped:Connect(function()
+        if dragging then setFromX(U:GetMouseLocation().X) end
+    end)
+    task.wait(0.5)
+    ApplyJumpPower()
+end
+
+local function CloseJumpPower()
+    activeFeatures[1] = false
+    if jumpPowerGui then jumpPowerGui:Destroy(); jumpPowerGui = nil end
+    ApplyJumpPower()
+end
+
+-- ============ 🚀 F2: Speed ============
+local speedGui = nil
+local speedVal = 50
+
+local function ApplySpeed()
+    local ch = LP.Character
+    local hum = ch and ch:FindFirstChildOfClass("Humanoid")
+    if hum then hum.WalkSpeed = activeFeatures[2] and speedVal or 16 end
+end
+
+local function OpenSpeed()
+    if activeFeatures[2] then return end
+    activeFeatures[2] = true
+    speedGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    speedGui.Name = "MZ_Speed"
+    speedGui.ResetOnSpawn = false
+
+    local Frame = Instance.new("Frame", speedGui)
+    Frame.Size = UDim2.new(0, 260, 0, 120)
+    Frame.Position = UDim2.new(0, 20, 0.3, 140)
+    Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+    Frame.Active = true
+    Frame.Draggable = true
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
+
+    local Title = Instance.new("TextLabel", Frame)
+    Title.Size = UDim2.new(1, -10, 0, 24)
+    Title.Position = UDim2.new(0, 5, 0, 5)
+    Title.BackgroundTransparency = 1
+    Title.Text = "🚀 MZ Speed"
+    Title.TextColor3 = Color3.fromRGB(255, 200, 100)
+    Title.TextSize = 14
+    Title.Font = Enum.Font.SourceSansBold
+
+    local Label = Instance.new("TextLabel", Frame)
+    Label.Size = UDim2.new(1, -20, 0, 20)
+    Label.Position = UDim2.new(0, 10, 0, 70)
+    Label.BackgroundTransparency = 1
+    Label.Text = "Speed: " .. speedVal
+    Label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label.TextSize = 12
+
+    local Bar = Instance.new("Frame", Frame)
+    Bar.Size = UDim2.new(1, -20, 0, 14)
+    Bar.Position = UDim2.new(0, 10, 0, 95)
+    Bar.BackgroundColor3 = Color3.fromRGB(50, 45, 60)
+    Bar.BorderSizePixel = 0
+    Instance.new("UICorner", Bar).CornerRadius = UDim.new(1, 0)
+
+    local Fill = Instance.new("Frame", Bar)
+    Fill.Size = UDim2.new(0.5, 0, 1, 0)
+    Fill.BackgroundColor3 = Color3.fromRGB(255, 140, 20)
+    Fill.BorderSizePixel = 0
+    Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
+
+    local Knob = Instance.new("Frame", Bar)
+    Knob.Size = UDim2.new(0, 18, 0, 18)
+    Knob.Position = UDim2.new(0.5, -9, 0.5, -9)
+    Knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Knob.ZIndex = 2
+    Instance.new("UICorner", Knob).CornerRadius = UDim.new(1, 0)
+
+    local dragging = false
+    local function setFromX(x)
+        local ax = Bar.AbsolutePosition.X
+        local aw = Bar.AbsoluteSize.X
+        local a = math.clamp((x - ax) / aw, 0, 1)
+        local v = math.floor(16 + (200 - 16) * a)
+        speedVal = v
+        Fill.Size = UDim2.new(a, 0, 1, 0)
+        Knob.Position = UDim2.new(a, -9, 0.5, -9)
+        Label.Text = "Speed: " .. v
+        if activeFeatures[2] then ApplySpeed() end
+    end
+    Bar.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1
+        or i.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; setFromX(i.Position.X)
+        end
+    end)
+    U.InputEnded:Connect(function() dragging = false end)
+    RunService.RenderStepped:Connect(function()
+        if dragging then setFromX(U:GetMouseLocation().X) end
+    end)
+    task.wait(0.5)
+    ApplySpeed()
+end
+
+local function CloseSpeed()
+    activeFeatures[2] = false
+    if speedGui then speedGui:Destroy(); speedGui = nil end
+    ApplySpeed()
+end
+
+-- ============ 👁️ F3: ESP ============
+local espGui = nil
+local espConns = {}
+
+local function makeESP(plr)
+    if plr == LP then return end
+    local function addESP(char)
+        if not char or not espGui then return end
+        local hrp = char:WaitForChild("HumanoidRootPart", 2)
+        if not hrp then return end
+        local hl = Instance.new("Highlight", espGui)
+        hl.Name = "MZ_ESP_HL"
+        hl.Adornee = char
+        hl.FillColor = Color3.fromRGB(255, 60, 60)
+        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+        hl.FillTransparency = 0.5
+        hl.OutlineTransparency = 0
+        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        local tag = Instance.new("BillboardGui", espGui)
+        tag.Name = "MZ_ESP_Tag"
+        tag.Adornee = hrp
+        tag.Size = UDim2.new(0, 120, 0, 30)
+        tag.StudsOffset = Vector3.new(0, 3.5, 0)
+        tag.AlwaysOnTop = true
+        local lbl = Instance.new("TextLabel", tag)
+        lbl.Size = UDim2.new(1, 0, 1, 0)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = plr.Name
+        lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+        lbl.TextStrokeTransparency = 0
+        lbl.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        lbl.TextSize = 14
+        lbl.Font = Enum.Font.SourceSansBold
+    end
+    if plr.Character then addESP(plr.Character) end
+    table.insert(espConns, plr.CharacterAdded:Connect(addESP))
+end
+
+local function OpenESP()
+    if activeFeatures[3] then return end
+    activeFeatures[3] = true
+    espGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    espGui.Name = "MZ_ESP"
+    espGui.ResetOnSpawn = false
+    for _, p in ipairs(P:GetPlayers()) do makeESP(p) end
+    table.insert(espConns, P.PlayerAdded:Connect(makeESP))
+end
+
+local function CloseESP()
+    activeFeatures[3] = false
+    for _, c in ipairs(espConns) do pcall(function() c:Disconnect() end) end
+    espConns = {}
+    if espGui then espGui:Destroy(); espGui = nil end
+end
+
+-- ============ 🎯 F4: Aim + Crosshair ============
+local aimGui = nil
+local aimConn = nil
+local aimSmooth = 0.3
+local aimRadius = 80
+local aimFov = 300
+
+local function OpenAim()
+    if activeFeatures[4] then return end
+    activeFeatures[4] = true
+
+    local CM = workspace.CurrentCamera
+    aimGui = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    aimGui.Name = "MZ_Aim"
+    aimGui.ResetOnSpawn = false
+    aimGui.IgnoreGuiInset = true
+
+    local crosshair = Instance.new("Frame", aimGui)
+    crosshair.Size = UDim2.new(0, aimRadius, 0, aimRadius)
+    crosshair.Position = UDim2.new(0.5, -aimRadius/2, 0.5, -aimRadius/2)
+    crosshair.BackgroundTransparency = 1
+    crosshair.BorderSizePixel = 0
+    crosshair.ZIndex = 999
+
+    local circle = Instance.new("Frame", crosshair)
+    circle.Size = UDim2.new(1, 0, 1, 0)
+    circle.BackgroundTransparency = 1
+    circle.BorderSizePixel = 0
+    Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
+    local circleStroke = Instance.new("UIStroke", circle)
+    circleStroke.Color = Color3.fromRGB(255, 60, 60)
+    circleStroke.Thickness = 3
+    circleStroke.Transparency = 0.2
+
+    local dot = Instance.new("Frame", crosshair)
+    dot.Size = UDim2.new(0, 6, 0, 6)
+    dot.Position = UDim2.new(0.5, -3, 0.5, -3)
+    dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    dot.BorderSizePixel = 0
+    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+
+    local Frame = Instance.new("Frame", aimGui)
+    Frame.Size = UDim2.new(0, 260, 0, 190)
+    Frame.Position = UDim2.new(0, 20, 0.3, 270)
+    Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+    Frame.Active = true
+    Frame.Draggable = true
+    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
+
+    local Title = Instance.new("TextLabel", Frame)
+    Title.Size = UDim2.new(1, -10, 0, 24)
+    Title.Position = UDim2.new(0, 5, 0, 5)
+    Title.BackgroundTransparency = 1
+    Title.Text = "🎯 MZ Aim Assist"
+    Title.TextColor3 = Color3.fromRGB(255, 200, 100)
+    Title.TextSize = 14
+    Title.Font = Enum.Font.SourceSansBold
+
+    local Label1 = Instance.new("TextLabel", Frame)
+    Label1.Size = UDim2.new(1, -20, 0, 18)
+    Label1.Position = UDim2.new(0, 10, 0, 32)
+    Label1.BackgroundTransparency = 1
+    Label1.Text = "💨 ความลื่น: 30%"
+    Label1.TextColor3 = Color3.fromRGB(220, 220, 220)
+    Label1.TextSize = 11
+    Label1.TextXAlignment = Enum.TextXAlignment.Left
+
+    local Bar1 = Instance.new("Frame", Frame)
+    Bar1.Size = UDim2.new(1, -20, 0, 12)
+    Bar1.Position = UDim2.new(0, 10, 0, 52)
+    Bar1.BackgroundColor3 = Color3.fromRGB(50, 45, 60)
+    Bar1.BorderSizePixel = 0
+    Instance.new("UICorner", Bar1).CornerRadius = UDim.new(1, 0)
+
+    local Fill1 = Instance.new("Frame", Bar1)
+    Fill1.Size = UDim2.new(0.3, 0, 1, 0)
+    Fill1.BackgroundColor3 = Color3.fromRGB(255, 140, 20)
+    Fill1.BorderSizePixel = 0
+    Instance.new("UICorner", Fill1).CornerRadius = UDim.new(1, 0)
+
+    local Knob1 = Instance.new("Frame", Bar1)
+    Knob1.Size = UDim2.new(0, 16, 0, 16)
+    Knob1.Position = UDim2.new(0.3, -8, 0.5, -8)
+    Knob1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Knob1.ZIndex = 2
+    Instance.new("UICorner", Knob1).CornerRadius = UDim.new(1, 0)
+
+    local drag1 = false
+    local function setX1(x)
+        local ax = Bar1.AbsolutePosition.X
+        local aw = Bar1.AbsoluteSize.X
+        local a = math.clamp((x - ax) / aw, 0, 1)
+        aimSmooth = a
+        Fill1.Size = UDim2.new(a, 0, 1, 0)
+        Knob1.Position = UDim2.new(a, -8, 0.5, -8)
+        Label1.Text = "💨 ความลื่น: " .. math.floor(a * 100) .. "%"
+    end
+    Bar1.InputBegan:Connect(function(i)
+        if i.UserInputType == Enum.UserInputType.MouseButton1
+        or i.UserInputType == Enum.UserInputType.Touch then
+            drag1 = true;
